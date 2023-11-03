@@ -1,0 +1,21 @@
+{
+  "name": "realtime",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "fmt": "bun biome format . --write && bun biome check . --apply-unsafe",
+    "test": "turbo run test",
+    "clean": "git clean -xdf node_modules dist bun.lockb"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.2.2",
+    "turbo": "latest",
+    "typescript": "latest"
+  },
+  "packageManager": "bun@1.0.3",
+  "workspaces": [
+    "apps/*"
+  ]
+}
+
