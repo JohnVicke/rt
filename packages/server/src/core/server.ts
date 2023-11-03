@@ -1,11 +1,10 @@
-import { object, safeParseAsync, string } from "valibot";
+import { safeParseAsync } from "valibot";
 import { HttpMethod } from "../schemas/http-method";
-import { RTRouter } from "..";
-import { RTRoute } from "./router";
+import { RTRoute } from "./route";
+import { RTRouter } from "./router";
 
 export class RTServer {
   private static server?: RTServer;
-  private ctx: Record<PropertyKey, any>;
 
   constructor() {
     if (RTServer.server) {
@@ -50,19 +49,3 @@ export class RTServer {
     });
   }
 }
-
-const rt = new RTServer();
-
-const inputSchema = object({ name: string(), test: string() });
-
-const router = rt.router({
-  "/": rt
-    .get()
-    .input(inputSchema)
-    .handler(({ input }) => {
-      return new Response();
-    }),
-  "/user": rt.post().handler(() => {
-    return new Response();
-  }),
-});
