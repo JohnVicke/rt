@@ -32,10 +32,10 @@ export class RTServer {
     return new RTRoute();
   }
 
-  listen(port?: number) {
+  listen(port = 3000, options?: { development?: boolean }) {
     Bun.serve({
       port,
-      development: Bun.env.NODE_ENV === "development",
+      development: options?.development,
       async fetch(req) {
         const url = new URL(req.url);
         const method = await safeParseAsync(HttpMethod, req.method);
