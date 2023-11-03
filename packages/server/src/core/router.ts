@@ -1,9 +1,9 @@
 import { RTRoute } from "./route";
 
 export class RTRouter {
-  private registeredRoutes: Record<string, RTRoute>;
+  private registeredRoutes: Record<string, RTRoute | RTRouter>;
 
-  constructor(routerInit: Record<string, RTRoute>) {
+  constructor(routerInit: Record<string, RTRoute | RTRouter>) {
     this.registeredRoutes = routerInit;
   }
 
