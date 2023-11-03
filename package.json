@@ -1,5 +1,5 @@
 {
-  "name": "realtime",
+  "name": "rt",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -14,8 +14,12 @@
     "typescript": "latest"
   },
   "packageManager": "bun@1.0.3",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ]
 }
 
