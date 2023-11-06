@@ -1,8 +1,8 @@
 import { BaseSchema, Input } from "valibot";
 
-type HandlerInit<TPath> = {
-  path: TPath;
-  handler: Function;
+type HandlerInit<THandlerFn, TBodySchema> = {
+  handler: THandlerFn;
+  bodySchema?: TBodySchema;
 };
 
 export type HandlerContext<TBody = unknown> = {
@@ -10,16 +10,19 @@ export type HandlerContext<TBody = unknown> = {
   body: Input<BaseSchema<TBody>>;
 };
 
-export class Handler<const TPath extends string> {
-  public path: string;
-  private handlerFn: Function;
+export class Handler<
+  THandlerFn extends (context: HandlerContext<TBodySchema>) => any,
+  TBodySchema = undefined,
+> {
+  public handlerFn: THandlerFn;
+  public bodySchema?: TBodySchema;
 
-  constructor(options: HandlerInit<TPath>) {
-    this.path = options.path;
+  constructor(options: HandlerInit<THandlerFn, TBodySchema>) {
     this.handlerFn = options.handler;
+    this.bodySchema = options.bodySchema;
   }
 
-  async run(context: HandlerContext) {
+  async run(context: HandlerContext<TBodySchema>) {
     const result = await this.handlerFn(context);
 
     if (typeof result === "object") {

@@ -1,54 +1,92 @@
-import { BaseSchema, safeParseAsync } from "valibot";
+import { BaseSchema } from "valibot";
 import { HttpMethod } from "../schemas/http-method";
 import { Handler, HandlerContext } from "./handler";
 
-type HandlerKey = `${HttpMethod}-${string}`;
+type RoutesBase = {
+  [path: string]: {
+    [method in HttpMethod]: Handler<any, any>;
+  };
+};
 
-export class RT {
-  private routes = new Map<string, Handler<string>>();
+export class RT<TRoutes extends RoutesBase = {}> {
+  routes = {} as TRoutes;
 
-  get<const TPath extends string>(
-    path: TPath,
-    handler: (context: HandlerContext) => any,
+  private addRouteHandler(
+    path: string,
+    method: HttpMethod,
+    handler: Handler<any, unknown>,
   ) {
-    const key = `GET-${path}` satisfies HandlerKey;
-    const route = new Handler({ path, handler });
-    this.routes.set(key, route);
+    if (!this.routes[path]) {
+      this.routes[path as keyof TRoutes] = {} as any;
+    }
+    this.routes[path][method] = handler;
+  }
+
+  get<
+    const TPath extends string,
+    const THandlerFn extends (context: HandlerContext) => any,
+  >(
+    path: TPath,
+    handler: THandlerFn,
+  ): RT<
+    TRoutes & {
+      [path in TPath]: {
+        GET: Handler<THandlerFn>;
+      };
+    }
+  > {
+    this.addRouteHandler(path, "GET", new Handler({ handler }));
     return this;
   }
 
-  post<TPath extends string>(
+  post<
+    const TPath extends string,
+    const THandlerFn extends (context: HandlerContext) => any,
+  >(
     path: TPath,
-    handler: (context: HandlerContext) => any,
-  ): this;
+    handler: THandlerFn,
+  ): RT<
+    TRoutes & {
+      [path in TPath]: {
+        POST: Handler<THandlerFn, unknown>;
+      };
+    }
+  >;
 
-  post<TPath extends string, TBody>(
+  post<
+    const TPath extends string,
+    const THandlerFn extends (context: HandlerContext<TBodySchema>) => any,
+    const TBodySchema,
+  >(
     path: TPath,
-    schemas: { body: BaseSchema<TBody> },
-    handler: (context: HandlerContext<TBody>) => any,
-  ): this;
+    schemas: { body: BaseSchema<TBodySchema> },
+    handlerFn: THandlerFn,
+  ): RT<
+    TRoutes & {
+      [path in TPath]: {
+        POST: Handler<THandlerFn, TBodySchema>;
+      };
+    }
+  >;
 
-  post<Path extends string, TBody>(
-    path: Path,
-    bodyOrHandler:
-      | { body: BaseSchema<TBody> }
-      | ((context: HandlerContext) => Promise<any>),
-    handler?: (context: HandlerContext<TBody>) => Promise<any>,
+  post<
+    const TPath extends string,
+    const THandlerFn extends (context: HandlerContext) => any,
+    const TBodySchema,
+  >(
+    path: TPath,
+    bodyOrHandler: { body: BaseSchema<TBodySchema> } | THandlerFn,
+    handler?: THandlerFn,
   ): this {
-    const key = `POST-${path}` satisfies HandlerKey;
-
     if (bodyOrHandler instanceof Function) {
-      const route = new Handler({ path, handler: bodyOrHandler });
-      this.routes.set(key, route);
+      const route = new Handler({ handler: bodyOrHandler });
+      this.addRouteHandler(path, "POST", route);
       return this;
     }
 
-    const route = new Handler({
-      path,
-      handler: handler!,
-    });
+    const route = new Handler({ handler: handler! });
+    this.addRouteHandler(path, "POST", route);
 
-    this.routes.set(key, route);
     return this;
   }
 
@@ -57,26 +95,17 @@ export class RT {
   }
 
   async handle(req: Request) {
-    const method = await safeParseAsync(HttpMethod, req.method);
+    const reqUrl = new URL(req.url);
+    const handler = this.routes[reqUrl.pathname]?.[req.method as HttpMethod];
 
-    if (!method.success) {
-      return new Response("invalid method", { status: 400 });
+    if (!handler) {
+      return new Response("Not found", { status: 404 });
     }
-
-    const url = new URL(req.url);
-
-    const key = `${method.output}-${url.pathname}` satisfies HandlerKey;
-
-    if (!this.routes.has(key)) {
-      return new Response("not found", { status: 404 });
-    }
-
-    const handler = this.routes.get(key)!;
 
     const isJson = req.headers.get("Content-Type") === "application/json";
     const body = isJson ? await req.json() : await req.text();
 
-    return handler.run({ request: req, body });
+    return handler.run({ body, request: req });
   }
 
   listen(port = 3000, options?: { development?: boolean }) {
