@@ -6,7 +6,8 @@
     "dev": "bun run src/index.ts --watch"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "expect-type": "^0.17.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
