@@ -1,15 +1,24 @@
 import { type Input, type BaseSchema, parseAsync, ValiError } from "valibot";
 import { HttpStatusCode } from "../types/http-code";
 
-type HandlerFnOptions<TBody, TQuery> = {
+type HandlerFnOptions<TBody, TQuery, TCtx> = {
   body: TBody extends BaseSchema ? Input<TBody> : never;
   params: TQuery extends BaseSchema ? Input<TQuery> : never;
+  ctx: TCtx;
 };
 
-export class RTRoute<TBody = unknown, TParams = unknown> {
+export class RTRoute<TBody = unknown, TParams = unknown, TCtx = unknown> {
   private bodySchema?: BaseSchema<TBody>;
   private paramSchema?: BaseSchema<TParams>;
-  private handlerFn?: (options: HandlerFnOptions<TBody, TParams>) => Response;
+  private handlerFn?: (
+    options: HandlerFnOptions<TBody, TParams, TCtx>,
+  ) => Response;
+
+  private ctx: TCtx;
+
+  constructor(ctx: TCtx) {
+    this.ctx = ctx;
+  }
 
   getHandlerFn() {
     return this.handlerFn;
@@ -17,15 +26,17 @@ export class RTRoute<TBody = unknown, TParams = unknown> {
 
   body<TSchema>(schema: BaseSchema<TSchema>) {
     this.bodySchema = schema as any;
-    return this as unknown as RTRoute<typeof schema, typeof this.paramSchema>;
+    return this as RTRoute<typeof schema, typeof this.paramSchema, TCtx>;
   }
 
   params<TSchema>(schema: BaseSchema<TSchema>) {
     this.paramSchema = schema as any;
-    return this as unknown as RTRoute<typeof this.bodySchema, typeof schema>;
+    return this as RTRoute<typeof this.bodySchema, typeof schema, TCtx>;
   }
 
-  handler(handlerFn: (options: HandlerFnOptions<TBody, TParams>) => Response) {
+  handler(
+    handlerFn: (options: HandlerFnOptions<TBody, TParams, TCtx>) => Response,
+  ) {
     this.handlerFn = handlerFn;
     return this;
   }
@@ -77,7 +88,8 @@ export class RTRoute<TBody = unknown, TParams = unknown> {
       const options = {
         body: body.value,
         params: params.value,
-      } as HandlerFnOptions<TBody, TParams>;
+        ctx: this.ctx,
+      } as HandlerFnOptions<TBody, TParams, TCtx>;
 
       return this.handlerFn(options);
     };

@@ -1,35 +1,31 @@
-import { safeParseAsync } from "valibot";
+import { object, safeParseAsync, string } from "valibot";
 import { HttpMethod } from "../schemas/http-method";
 import { RTRoute } from "./route";
 import { RTRouter } from "./router";
 
-export class RTServer {
-  private static server?: RTServer;
+type RouterInit = Record<PropertyKey, RTRoute<any>>;
 
-  constructor() {
-    if (RTServer.server) {
-      throw new Error("RTServer already exists");
-    }
-    RTServer.server = this;
+export class RTServer<TCtx = unknown> {
+  private ctx: TCtx;
+
+  constructor(ctx: TCtx) {
+    this.ctx = ctx;
   }
 
-  static get instance() {
-    if (!RTServer.server) {
-      RTServer.server = new RTServer();
-    }
-    return RTServer.server;
-  }
-
-  router(routerInit: Record<PropertyKey, RTRoute<any>>) {
+  router(routerInit: RouterInit) {
     return new RTRouter(routerInit);
   }
 
-  get() {
-    return new RTRoute();
+  get GET() {
+    return new RTRoute(this.ctx);
   }
 
-  post() {
-    return new RTRoute();
+  get POST() {
+    return new RTRoute(this.ctx);
+  }
+
+  get PUT() {
+    return new RTRoute(this.ctx);
   }
 
   listen(port = 3000, options?: { development?: boolean }) {
@@ -49,3 +45,25 @@ export class RTServer {
     });
   }
 }
+
+const initRTServer = () => {
+  const init = {
+    context: <TCtx>(ctx: TCtx) => {
+      return { create: () => new RTServer(ctx) };
+    },
+    create: <TCtx>(ctx?: TCtx) => {
+      return new RTServer(ctx);
+    },
+  };
+  return init;
+};
+
+const rt = initRTServer().context({ user: "hello" }).create();
+
+rt.router({
+  "/": rt.GET.body(object({ name: string() })).handler(
+    ({ ctx, params, body }) => {
+      return new Response();
+    },
+  ),
+});
