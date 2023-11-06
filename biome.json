@@ -17,7 +17,7 @@
     "indentStyle": "space",
     "indentSize": 2,
     "enabled": true,
-    "lineWidth": 120,
+    "lineWidth": 80,
     "ignore": ["node_modules", ".next", "dist", ".nuxt", ".contentlayer"]
   }
 }
