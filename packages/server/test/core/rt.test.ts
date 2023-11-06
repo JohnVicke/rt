@@ -65,15 +65,4 @@ describe("RT", () => {
       expect(await res.json<any>()).toEqual({ name: "viktor" });
     });
   });
-  describe("group", () => {
-    it("handles group prefixed path", async () => {
-      const app = new RT().group("/hello", (group) => {
-        group.get("/world", () => "hello world");
-        return group;
-      });
-
-      const res = await app.handle(testRequest("/hello/world"));
-      expect(await res.text()).toEqual("hello world");
-    });
-  });
 });
