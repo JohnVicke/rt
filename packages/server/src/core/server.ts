@@ -1,6 +1,7 @@
 import { BaseSchema } from "valibot";
 import { HttpMethod } from "../schemas/http-method";
 import { Handler, HandlerContext } from "./handler";
+import { Serve } from "bun";
 
 type RoutesBase = {
   [path: string]: {
@@ -9,7 +10,11 @@ type RoutesBase = {
 };
 
 export class RT<TRoutes extends RoutesBase = {}> {
-  routes = {} as TRoutes;
+  routes: TRoutes;
+
+  constructor() {
+    this.routes = {} as TRoutes;
+  }
 
   private addRouteHandler(
     path: string,
@@ -94,7 +99,7 @@ export class RT<TRoutes extends RoutesBase = {}> {
     return this;
   }
 
-  async handle(req: Request) {
+  fetch = async (req: Request) => {
     const reqUrl = new URL(req.url);
     const handler = this.routes[reqUrl.pathname]?.[req.method as HttpMethod];
 
@@ -106,16 +111,30 @@ export class RT<TRoutes extends RoutesBase = {}> {
     const body = isJson ? await req.json() : await req.text();
 
     return handler.run({ body, request: req });
-  }
+  };
 
-  listen(port = 3000, options?: { development?: boolean }) {
-    const handler = this.handle;
-    Bun.serve({
-      port,
-      development: options?.development,
-      async fetch(req) {
-        return handler(req);
+  listen(
+    options: number | (Partial<Serve> & { port?: number }),
+    cb?: () => void,
+  ) {
+    const port = typeof options === "number" ? options : options?.port ?? 3000;
+    const fetch = this.fetch;
+
+    const serve = {
+      ...(typeof options !== "number" && options),
+      websocket: {
+        open: () => {},
+        message: () => {},
       },
-    });
+      fetch,
+      port,
+      development: true,
+    } satisfies Serve;
+
+    Bun.serve(serve);
+
+    if (cb) {
+      cb();
+    }
   }
 }
