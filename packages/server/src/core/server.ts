@@ -135,9 +135,7 @@ export class RT<TRoutes extends RoutesBase = {}> {
 
     Bun.serve(serve);
 
-    if (cb) {
-      cb();
-    }
+    cb?.();
     return this;
   }
 }
