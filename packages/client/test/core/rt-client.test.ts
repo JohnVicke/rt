@@ -1,8 +1,8 @@
 import { describe, it } from "bun:test";
-import { RTClient } from "../../src";
 import { RT } from "@rt/server";
 import { expectTypeOf } from "expect-type";
 import { object, string } from "valibot";
+import { RTClient } from "../../src";
 
 describe("RTClient", () => {
   const app = new RT()
@@ -21,8 +21,6 @@ describe("RTClient", () => {
 
   it("infers return type for post", async () => {
     const client = new RTClient<typeof app>("http://localhost:3000");
-    const response = client.post("/hello", { name: "hello" });
-
     expectTypeOf(client.post("/hello", { name: "hello" })).toEqualTypeOf<
       Promise<{ name: string }>
     >();

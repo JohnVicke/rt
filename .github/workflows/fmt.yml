@@ -6,13 +6,13 @@ jobs:
         uses: actions/checkout@v3
       - name: Prepare actions
         uses: ./.github/actions/prepare
-      - name: fmt
-        run: bun run fmt
+      - name: fmt 
+        run: bun run ci
       - uses: mshick/add-pr-comment@v2
         if: failure()
         with:
           message-failure: |
-            Uh oh! Biome found some issues. Please run `bun lint:fix` and commit the changes
+            Uh oh! Biome found some issues. Please run `bun fmt` and commit the changes
 
 name: Biome lint and format
 

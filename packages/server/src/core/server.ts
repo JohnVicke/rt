@@ -1,7 +1,7 @@
+import { Serve } from "bun";
 import { BaseSchema } from "valibot";
 import { HttpMethod } from "../schemas/http-method";
 import { Handler, HandlerContext } from "./handler";
-import { Serve } from "bun";
 
 type RoutesBase = {
   [path: string]: {
@@ -9,6 +9,7 @@ type RoutesBase = {
   };
 };
 
+// biome-ignore lint/complexity/noBannedTypes: <explanation>
 export class RT<TRoutes extends RoutesBase = {}> {
   routes: TRoutes;
 
@@ -35,7 +36,7 @@ export class RT<TRoutes extends RoutesBase = {}> {
     handler: THandlerFn,
   ): RT<
     TRoutes & {
-      [path in TPath]: {
+      [p in TPath]: {
         GET: Handler<THandlerFn>;
       };
     }
@@ -52,7 +53,7 @@ export class RT<TRoutes extends RoutesBase = {}> {
     handler: THandlerFn,
   ): RT<
     TRoutes & {
-      [path in TPath]: {
+      [p in TPath]: {
         POST: Handler<THandlerFn, unknown>;
       };
     }
@@ -68,7 +69,7 @@ export class RT<TRoutes extends RoutesBase = {}> {
     handlerFn: THandlerFn,
   ): RT<
     TRoutes & {
-      [path in TPath]: {
+      [p in TPath]: {
         POST: Handler<THandlerFn, TBodySchema>;
       };
     }
@@ -89,6 +90,7 @@ export class RT<TRoutes extends RoutesBase = {}> {
       return this;
     }
 
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     const route = new Handler({ handler: handler! });
     this.addRouteHandler(path, "POST", route);
 

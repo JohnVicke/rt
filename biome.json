@@ -1,23 +1,26 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
   "organizeImports": {
-    "enabled": false
+    "enabled": true
   },
   "linter": {
     "enabled": true,
     "rules": {
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "off"
       },
       "recommended": true
-    },
-    "ignore": ["node_modules", ".next", "dist", ".nuxt", ".contentlayer"]
+    }
   },
   "formatter": {
     "indentStyle": "space",
-    "indentSize": 2,
+    "indentWidth": 2,
     "enabled": true,
-    "lineWidth": 80,
-    "ignore": ["node_modules", ".next", "dist", ".nuxt", ".contentlayer"]
+    "lineWidth": 80
+  },
+  "files": {
+    "ignore": ["node_modules", "dist", "bun.lockb"],
+    "include": ["src/**/*.ts"],
+    "ignoreUnknown": true
   }
 }

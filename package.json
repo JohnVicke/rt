@@ -4,12 +4,13 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "fmt": "bun biome format . --write && bun biome check . --apply-unsafe",
+    "fmt": "biome check . --apply-unsafe",
+    "ci": "bun biome ci .",
     "test": "turbo run test",
     "clean": "git clean -xdf node_modules dist bun.lockb"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.2.2",
+    "@biomejs/biome": "latest",
     "turbo": "latest",
     "typescript": "latest"
   },
@@ -22,4 +23,3 @@
     "packages/*"
   ]
 }
-

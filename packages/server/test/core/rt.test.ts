@@ -1,8 +1,8 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
+import { expectTypeOf } from "expect-type";
+import { object, string } from "valibot";
 import { RT } from "../../src";
 import { testRequest } from "../__util";
-import { object, string } from "valibot";
-import { expectTypeOf } from "expect-type";
 
 describe("RT", () => {
   describe("get", () => {
