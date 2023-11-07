@@ -138,5 +138,6 @@ export class RT<TRoutes extends RoutesBase = {}> {
     if (cb) {
       cb();
     }
+    return this;
   }
 }

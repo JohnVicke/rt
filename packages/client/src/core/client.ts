@@ -25,6 +25,10 @@ type ReturnTypeForHandler<
     : never
   : never;
 
+type FetchResponse<TReturn> = Promise<{
+  data: TReturn;
+}>;
+
 export class RTClient<TApp extends RT> {
   private baseUrl: string;
 
@@ -32,35 +36,56 @@ export class RTClient<TApp extends RT> {
     this.baseUrl = baseUrl;
   }
 
+  async fetch<TReturn>(
+    url: string,
+    options?: FetchRequestInit,
+  ): FetchResponse<TReturn> {
+    return fetch(url, options).then(async (res) => {
+      switch (res.headers.get("Content-Type")?.split(";")[0]) {
+        case "application/json": {
+          const data = await res.json<TReturn>();
+          return {
+            data,
+          };
+        }
+        default: {
+          const data = (await res.text()) as TReturn;
+          return {
+            data,
+          };
+        }
+      }
+    });
+  }
+
   async get<
     const TPath extends PathForMethod<TApp["routes"], "GET">,
     const TReturn extends ReturnTypeForHandler<TApp["routes"], TPath, "GET">,
   >(path: TPath) {
-    const result = await fetch(`${this.baseUrl}/${path}`);
-    return result.json<TReturn>();
+    return this.fetch<TReturn>(`${this.baseUrl}${path}`);
   }
 
   async post<
     const TPath extends PathForMethod<TApp["routes"], "POST">,
     const TReturn extends ReturnTypeForHandler<TApp["routes"], TPath, "POST">,
-  >(path: TPath): Promise<TReturn>;
+  >(path: TPath): FetchResponse<TReturn>;
 
   async post<
     const TPath extends PathForMethod<TApp["routes"], "POST">,
     const TReturn extends ReturnTypeForHandler<TApp["routes"], TPath, "POST">,
     const TBody extends InputForHandler<TApp["routes"], TPath, "POST">,
-  >(path: TPath, body: TBody): Promise<TReturn>;
+  >(path: TPath, body: TBody): FetchResponse<TReturn>;
 
   async post<
     const TPath extends PathForMethod<TApp["routes"], "POST">,
     const TReturn extends ReturnTypeForHandler<TApp["routes"], TPath, "POST">,
     const TBody extends InputForHandler<TApp["routes"], TPath, "POST">,
   >(path: TPath, body?: TBody) {
-    const result = await fetch(`${this.baseUrl}/${path}`, {
+    const contentTypeHeader = body && { "Content-Type": "application/json" };
+    return this.fetch<TReturn>(`${this.baseUrl}${path}`, {
       method: "POST",
       body: JSON.stringify(body),
-      headers: { "Content-Type": "application/json" },
+      headers: { ...contentTypeHeader },
     });
-    return result.json<TReturn>();
   }
 }

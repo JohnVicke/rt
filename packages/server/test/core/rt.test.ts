@@ -8,26 +8,26 @@ describe("RT", () => {
   describe("get", () => {
     it("handles root path", async () => {
       const app = new RT().get("/", () => "hello world");
-      const res = await app.handle(testRequest("/"));
+      const res = await app.fetch(testRequest("/"));
       expect(await res.text()).toEqual("hello world");
     });
     it("handles nested path", async () => {
       const app = new RT().get("/hello/world/whats/up", () => "hello world");
-      const res = await app.handle(testRequest("/hello/world/whats/up"));
+      const res = await app.fetch(testRequest("/hello/world/whats/up"));
       expect(await res.text()).toEqual("hello world");
     });
     it("returns JSON response if handler returns object", async () => {
       const app = new RT().get("/hello/world/whats/up", () => ({
         hello: "world",
       }));
-      const res = await app.handle(testRequest("/hello/world/whats/up"));
+      const res = await app.fetch(testRequest("/hello/world/whats/up"));
       expect(await res.json<any>()).toEqual({ hello: "world" });
     });
     it("returns 404 if path is not found", async () => {
       const app = new RT().get("/hello/world/whats/up", () => ({
         hello: "world",
       }));
-      const res = await app.handle(testRequest("/hello/world/whats/up/"));
+      const res = await app.fetch(testRequest("/hello/world/whats/up/"));
       expect(res.status).toEqual(404);
     });
   });
@@ -38,7 +38,7 @@ describe("RT", () => {
         return { foo: "bar" };
       });
 
-      const res = await app.handle(
+      const res = await app.fetch(
         testRequest("/hello", {
           method: "POST",
         }),
@@ -55,7 +55,7 @@ describe("RT", () => {
         },
       );
 
-      const res = await app.handle(
+      const res = await app.fetch(
         testRequest("/hello", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
