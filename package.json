@@ -1,5 +1,19 @@
 {
   "name": "rt",
+  "config": {
+    "commitizen": {
+      "path": "git-cz"
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "turbo": "latest",
+    "typescript": "latest"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "bun@1.0.3",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -9,22 +23,8 @@
     "test": "turbo run test",
     "clean": "git clean -xdf node_modules dist bun.lockb"
   },
-  "devDependencies": {
-    "@biomejs/biome": "latest",
-    "turbo": "latest",
-    "typescript": "latest"
-  },
-  "packageManager": "bun@1.0.3",
-  "engines": {
-    "node": ">=20.0.0"
-  },
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "config": {
-    "commitizen": {
-      "path": "git-cz"
-    }
-  }
+  ]
 }
