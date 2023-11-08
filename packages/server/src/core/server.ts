@@ -97,7 +97,7 @@ export class RT<TRoutes extends RoutesBase = {}> {
     return this;
   }
 
-  put() {
+  use() {
     return this;
   }
 
@@ -112,7 +112,13 @@ export class RT<TRoutes extends RoutesBase = {}> {
     const isJson = req.headers.get("Content-Type") === "application/json";
     const body = isJson ? await req.json() : await req.text();
 
-    return handler.run({ body, request: req });
+    const res = await handler.run({ body, request: req });
+    // TODO: create cors middleware
+    res.headers.set("Access-Control-Allow-Origin", "*");
+    res.headers.set("Access-Control-Allow-Methods", "*");
+    res.headers.set("Vary", "*");
+
+    return res;
   };
 
   listen(
