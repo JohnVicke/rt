@@ -1,11 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import { RouterProvider } from "@tanstack/react-router";
+import { router } from "./router";
 import "./index.css";
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
+const rootElement = document.getElementById("app")!;
+if (!rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <RouterProvider router={router} />
+    </React.StrictMode>,
+  );
+}
